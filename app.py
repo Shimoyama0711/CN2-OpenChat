@@ -160,6 +160,8 @@ def settings():
         username = form.get("username")
         avatar = "/static/img/anonymous.png"
 
+        session["username"] = username
+
         if 'avatar' in request.files:
             image_file = request.files['avatar']
 
@@ -184,6 +186,18 @@ def settings():
         conn.close()
 
         return render_template("settings.html", msg="設定の変更に成功しました", level="success")
+
+
+# 部屋を新規作成するページ
+@app.route("/create-new-room", methods=["GET", "POST"])
+def create_new_room():
+    method = request.method
+
+    if method == "GET":
+        return render_template("create-new-room.html")
+    else:
+        return "Coming soon..."
+
 
 
 # 時間を取得するだけのテストAPI
