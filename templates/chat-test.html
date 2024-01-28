@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+    <title>Chat Test</title>
+
+    <!-- Script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/chat-test.js') }}"></script>
+
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <link rel="icon" href="{{ url_for('static', filename='img/werewolf.png') }}">
+</head>
+
+<body>
+
+<nav id="navbar"></nav>
+
+<main role="main" class="container-fluid">
+    <div class="row justify-content-center align-items-stretch mt-5">
+        <div class="col-12">
+            <div class="row">
+                <div class="col-sm-12 col-md-6 p-3 rounded-1 shadow">
+                    <h2>
+                        <i class="bi-keyboard"></i>
+                        Input
+                    </h2>
+                    <label for="message-input">
+                        <i class="bi-chat-dots"></i>
+                        メッセージ入力
+                    </label>
+                    <input id="message-input" class="form-control mb-3" type="text">
+                    <button id="send-button" class="btn btn-success">
+                        <i class="bi-send"></i>
+                        送信
+                    </button>
+                </div>
+                <div class="col-sm-12 col-md-6 p-3 rounded-1 shadow">
+                    <h2>
+                        <i class="bi-clock-history"></i>
+                        Chat History
+                    </h2>
+                    <ul id="message-list" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+
+</html>
