@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+    <title>部屋の新規作成</title>
+
+    <!-- Script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/lobby.js') }}"></script>
+
+    <script>
+        $(function () {
+            $("#navbar").load("/navbar");
+        });
+    </script>
+
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <link rel="icon" href="{{ url_for('static', filename='img/werewolf.png') }}">
+
+    <style>
+        .avatar {
+            border-radius: 50%; /* 50%で丸くなります */
+            width: 32px; /* 画像の幅を設定 */
+            height: 32px; /* 画像の高さを設定 */
+            object-fit: cover; /* 画像のサイズを調整 */
+        }
+    </style>
+</head>
+
+<body>
+
+<nav id="navbar"></nav>
+
+<main role="main" class="container-fluid">
+    <div class="row justify-content-center align-items-stretch mt-5">
+        <div class="col-md-6 p-3 rounded-1 shadow">
+            <h2 class="text-center mb-3">Werewolf Game: No. {{ room_number }}</h2>
+            <div class="row mb-3">
+                <label for="amount">
+                    <i class="bi-person-fill"></i>
+                    <b>プレイ人数</b>
+                </label>
+                <input id="amount" class="form-control" type="number" step="1" min="3" placeholder="プレイ人数">
+            </div>
+            <div class="row mb-3">
+                <label for="time-limit">
+                    <i class="bi-hourglass-split"></i>
+                    <b>議論時間(秒)</b>
+                </label>
+                <input id="time-limit" class="form-control" type="number" step="1" min="30" max="180" placeholder="議論時間(秒)">
+            </div>
+            <div class="row mb-3">
+                <label for="villager-count">
+                    <i class="bi-person-heart"></i>
+                    <b>村人の人数</b>
+                </label>
+                <input id="villager-count" class="form-control" type="number" step="1" min="2" placeholder="村人の人数">
+            </div>
+            <div class="row mb-3">
+                <label for="wolf-count">
+                    <i class="bi-person-fill-x"></i>
+                    <b>人狼の人数</b>
+                </label>
+                <input id="wolf-count" class="form-control" type="number" step="1" min="1" placeholder="人狼の人数">
+            </div>
+            <div class="row mb-3">
+                <label for="madman-count">
+                    <i class="bi-yin-yang"></i>
+                    <b>狂人の人数</b>
+                </label>
+                <input id="madman-count" class="form-control" type="number" step="1" min="1" placeholder="狂人の人数">
+            </div>
+        </div>
+        <div class="col-md-6 p-3 rounded-1 shadow">
+            <div class="row align-items-stretch">
+                <div class="col-8">
+                    <h4 class="text-center mb-3">Player List</h4>
+
+                    <ul id="player-list" class="list-group"></ul>
+                </div>
+                <div class="col-4">
+                    <h4 class="text-center mb-3">Chat</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+
+</html>

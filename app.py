@@ -1,18 +1,34 @@
+import json
 from io import BytesIO
-
-from flask import Flask, render_template, request, session
 import datetime
-import mysql.connector as mydb
 import hashlib
-from PIL import Image
 import base64
+import random
+
+from flask import Flask, render_template, request, session, redirect, jsonify
+from flask_socketio import SocketIO, join_room
+import mysql.connector as mydb
+from PIL import Image
+
+from room import Room
+from player import Player
 
 
 app = Flask(__name__)
 
 
 # セッション機能を利用するために秘密鍵をセット
-app.secret_key = "12345678901234567890123456789013"
+app.secret_key = "1234567890abcdef1234567890abcdef"
+
+# リアルタイム更新のためにSocketIOを使う
+socketio = SocketIO(app)
+
+# 部屋の一覧
+# ここには room を入れます
+# {
+#     room_number: <room object>
+# }
+rooms = {}
 
 
 # SHA-256に変換
@@ -30,6 +46,29 @@ def to_sha256(input_string):
     hashed_string = sha256_hash.hexdigest()
 
     return hashed_string
+
+
+# ユーザー名からアバターを取得
+def get_avatar_from_username(username):
+    conn = mydb.connect(
+        host='localhost',
+        port='3306',
+        user='root',
+        password='BTcfrLkK1FFU',
+        database='werewolf'
+    )
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(f"SELECT * FROM users WHERE username = '{username}'")
+    user = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if user:
+        return user["avatar"]
+    else:
+        return "/static/img/anonymous.png"
 
 
 # /index
@@ -65,12 +104,19 @@ def signup():
 
         cursor = conn.cursor(dictionary=True)
 
-        # SELECT
+        # Eメールアドレスが既に登録されているかチェック
         cursor.execute(f"SELECT * FROM users WHERE email = '{email}'")
-        user = cursor.fetchone()
+        email_check = cursor.fetchone()
 
-        if user:
-            msg = "このEメールアドレスは既に登録されています"
+        # ユーザー名が既に登録されているかチェック
+        cursor.execute(f"SELECT * FROM users WHERE username = '{username}'")
+        username_check = cursor.fetchone()
+
+        if email_check:
+            msg = "そのEメールアドレスは既に登録されています"
+            return render_template("signup.html", msg=msg, level="danger"), 400
+        elif username_check:
+            msg = "そのユーザー名は既に登録されています"
             return render_template("signup.html", msg=msg, level="danger"), 400
         else:
             cursor.execute(f"INSERT IGNORE INTO users VALUES ('{email}', '{username}', '{password}', '0', '0', '/static/img/anonymous.png')")
@@ -158,9 +204,20 @@ def settings():
 
         email = session["email"]
         username = form.get("username")
-        avatar = "/static/img/anonymous.png"
 
-        session["username"] = username
+        cursor = conn.cursor(dictionary=True)
+
+        if len(username) > 0:
+            cursor.execute(f"SELECT * FROM users WHERE username = '{username}'")
+            user = cursor.fetchone()
+
+            if user:
+                return render_template("settings.html", msg="そのユーザー名は既に登録されています")
+            else:
+                session["username"] = username
+                cursor.execute(f"UPDATE users SET username = '{username}' WHERE email = '{email}'")
+
+        avatar = "/static/img/anonymous.png"
 
         if 'avatar' in request.files:
             image_file = request.files['avatar']
@@ -178,8 +235,8 @@ def settings():
                 # ここでbase64形式のデータを使って何かしらの処理を行うことができます
                 # print(avatar)
 
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(f"UPDATE users SET username = '{username}', avatar = '{avatar}' WHERE email = '{email}'")
+                cursor.execute(f"UPDATE users SET avatar = '{avatar}' WHERE email = '{email}'")
+
         conn.commit()
 
         cursor.close()
@@ -189,15 +246,53 @@ def settings():
 
 
 # 部屋を新規作成するページ
-@app.route("/create-new-room", methods=["GET", "POST"])
+@app.route("/create-new-room")
 def create_new_room():
     method = request.method
 
-    if method == "GET":
-        return render_template("create-new-room.html")
-    else:
-        return "Coming soon..."
+    # 部屋番号抽選
+    # 既に作成済みの部屋番号でなければループを抜ける
+    while True:
+        room_number = random.randint(0, 9999)
+        formatted_number = "{:04d}".format(room_number)
 
+        if formatted_number not in rooms:
+            room_object = Room(formatted_number, 3, 60, 2, 1, 0)
+            rooms[formatted_number] = room_object
+
+            username = session["username"]
+            avatar = get_avatar_from_username(username)
+
+            # プレイヤーの定義
+            player = Player(username, avatar, "unknown")
+
+            # 部屋作成者はオーナーとなる
+            player.is_owner = True
+
+            # プレイヤーを部屋に追加
+            rooms[formatted_number].add_player(player)
+
+            break
+
+    return redirect(f"/game/{formatted_number}")
+
+
+# ゲーム部屋
+@app.route("/game/<string:room_number>")
+def game(room_number):
+    if room_number not in rooms:
+        return render_template("error.html", title="Bad Room Number", code=400, msg="この部屋番号は存在しません")
+    else:
+        username = session["username"]
+        avatar = get_avatar_from_username(username)
+
+        # プレイヤーの定義
+        player = Player(username, avatar, "unknown")
+
+        # プレイヤーを追加
+        rooms[room_number].add_player(player)
+
+        return render_template("lobby.html", room_number=room_number, room=rooms[room_number])
 
 
 # 時間を取得するだけのテストAPI
@@ -205,6 +300,19 @@ def create_new_room():
 def time():
     now = datetime.datetime.now()
     return now.strftime("%Y/%m/%d %H:%M:%S"), 200
+
+
+# 部屋の状態確認（デバッグ）
+@app.route("/get-rooms")
+def get_rooms():
+    return str(rooms), {
+        "Content-Type": "text/plain"
+    }
+
+
+@app.route("/debug-lobby")
+def debug_lobby():
+    return render_template("lobby.html")
 
 
 # navbar です
@@ -240,6 +348,24 @@ def navbar():
         return render_template("navbar.html"), 200
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("error.html", title="Not Found", code=404, msg="あなたが探しているページは見つかりませんでした。"), 404
 
+
+@socketio.on('join')
+def on_join(data):
+    print("ON JOIN! :)")
+
+    room_number = data["room_number"]
+    players = rooms[room_number].players
+
+    # Playerオブジェクトを辞書型に変換
+    players_data = [player.to_dict() for player in players]
+
+    # 辞書型に変換されたプレイヤーデータをクライアントに送信
+    socketio.emit("update_room", {"room_number": room_number, "players": players_data})
+
+
+if __name__ == "__main__":
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, log_output=True, use_reloader=True)
