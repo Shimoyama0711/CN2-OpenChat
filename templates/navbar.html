@@ -45,8 +45,8 @@
                 {% if session.username|length > 0 %}
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img class="avatar" src="{{ avatar }}" alt="{{ session.username }}">
-                        {{ session.username }} さん
+                        <img id="your-avatar" class="avatar" src="{{ avatar }}" alt="{{ session.username }}">
+                        <span id="your-name">{{ session.username }}</span> さん
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="/settings">

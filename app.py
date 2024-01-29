@@ -10,8 +10,9 @@ from flask_socketio import SocketIO, join_room
 import mysql.connector as mydb
 from PIL import Image
 
-from room import Room
+from message import Message
 from player import Player
+from room import Room
 
 
 app = Flask(__name__)
@@ -355,7 +356,7 @@ def not_found(error):
 
 @socketio.on('join')
 def on_join(data):
-    print("ON JOIN! :)")
+    # print("ON JOIN! :)")
 
     room_number = data["room_number"]
     players = rooms[room_number].players
@@ -365,6 +366,27 @@ def on_join(data):
 
     # 辞書型に変換されたプレイヤーデータをクライアントに送信
     socketio.emit("update_room", {"room_number": room_number, "players": players_data})
+
+
+@socketio.on("send_message")
+def on_receive_message(data):
+    room_number = data["room_number"]
+    message = data["message"]
+    name = data["name"]
+    avatar = get_avatar_from_username(name)
+    now = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+
+    room = rooms[room_number]
+    message_data = Message(message, name, avatar, now)  # メッセージを生成
+    room.send_message(message_data)  # メッセージ履歴を追加
+
+    messages = room.message_history
+
+    # Messageオブジェクトを辞書型に変換
+    messages_data = [message.to_dict() for message in messages]
+
+    # 辞書型に変換されたメッセージ履歴をクライアントに送信
+    socketio.emit("receive_message", {"room_number": room_number, "messages": messages_data})
 
 
 if __name__ == "__main__":

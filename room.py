@@ -23,6 +23,10 @@ class Room:
             if p.name == player_name:
                 self.players.remove(p)
 
+    def send_message(self, message_data):
+        """ 部屋にメッセージを送信する """
+        self.message_history.append(message_data)
+
     def next_turn(self):
         """ 次のターン（日）に進む """
         self.turn += 1
@@ -40,3 +44,4 @@ class Room:
 
     def __str__(self):
         return f"Room(room_number='{self.room_number}', players={self.players}, turn={self.turn}, message_history={self.message_history}, amount={self.amount}, time_limit={self.time_limit}, villager_count={self.villager_count}, wolf_count={self.wolf_count}, madman_count={self.madman_count})"
+

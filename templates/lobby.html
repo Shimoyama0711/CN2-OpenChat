@@ -84,8 +84,20 @@
 
                     <ul id="player-list" class="list-group"></ul>
                 </div>
-                <div class="col-4">
+                <div class="col-4 d-flex flex-column" style="height: 50vh;">
                     <h4 class="text-center mb-3">Chat</h4>
+                    <div id="message-list" class="list-group flex-grow-1 overflow-auto"></div>
+                    <div class="mt-auto">
+                        <label for="message-input">
+                            <i class="bi-keyboard"></i>
+                            チャット入力
+                        </label>
+                        <input type="text" id="message-input" class="form-control">
+                        <button id="send-message-button" class="btn btn-success disabled mt-2">
+                            <i class="bi-send"></i>
+                            送信
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
