@@ -80,11 +80,11 @@
         <div class="col-md-6 p-3 rounded-1 shadow">
             <div class="row align-items-stretch">
                 <div class="col-8">
-                    <h4 class="text-center mb-3">Player List</h4>
+                    <h4 class="text-center mb-3">Player List ({{ room.players|length }})</h4>
 
                     <ul id="player-list" class="list-group"></ul>
                 </div>
-                <div class="col-4 d-flex flex-column" style="height: 50vh;">
+                <div class="col-4 d-flex flex-column" style="height: 80vh;">
                     <h4 class="text-center mb-3">Chat</h4>
                     <div id="message-list" class="list-group flex-grow-1 overflow-auto"></div>
                     <div class="mt-auto">

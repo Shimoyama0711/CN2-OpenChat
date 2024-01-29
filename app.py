@@ -77,7 +77,7 @@ def get_avatar_from_username(username):
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html"), 200
+    return render_template("index.html", rooms=rooms), 200
 
 
 # サインアップ機能です
