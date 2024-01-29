@@ -18,6 +18,7 @@ $(function() {
         });
 
         messageInput.val("");
+        messageInput.addClass("disabled");
     });
 
     // Socket IO //
