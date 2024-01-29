@@ -24,7 +24,12 @@ class Room:
                 self.players.remove(p)
 
     def send_message(self, message_data):
-        """ 部屋にメッセージを送信する """
+        """ 部屋にメッセージを送信する
+            500文字を超える場合は省略します """
+
+        if len(message_data.msg) > 500:
+            message_data.msg = message_data.msg[:500] + "<長いので省略>"
+
         self.message_history.append(message_data)
 
     def next_turn(self):
