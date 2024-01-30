@@ -1,4 +1,4 @@
-# CN2-Werewolf
+# CN2-OpenChat
 
 ## 🍘 Members
 **Group J**
