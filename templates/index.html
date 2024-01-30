@@ -83,28 +83,30 @@
                 <div class="row">
                     <h4>作成済みの部屋に参加する</h4>
 
-                    <div class="col-md-6 col-sm-12 mb-3">
-                        <ul class="list-group list-group-horizontal">
-                            {% for key in rooms %}
+                    <div class="col-sm-12 col-md-6 mb-3">
+                        {% for key in rooms %}
+                            <ul class="list-group">
                                 <li class="list-group-item d-flex align-items-center">
-                                    <b>{{ rooms[key].room_number }}</b>
+                                    <div class="col">
+                                        <b>{{ rooms[key].room_number }}</b>
+                                    </div>
+                                    <div class="col">
+                                        {% for player in rooms[key].players %}
+                                            <span>
+                                                <img class="avatar" src="{{ player.avatar }}" alt="{{ player.name }}">
+                                                {{ player.name }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col d-flex justify-content-center">
+                                        <a class="btn btn-info" href="/game/{{ rooms[key].room_number }}">
+                                            <i class="bi-door-open-fill"></i>
+                                            参加
+                                        </a>
+                                    </div>
                                 </li>
-                                <li class="list-group-item d-flex align-items-center">
-                                    {% for player in rooms[key].players %}
-                                        <span>
-                                            <img class="avatar" src="{{ player.avatar }}" alt="{{ player.name }}">
-                                            {{ player.name }}
-                                        </span>
-                                    {% endfor %}
-                                </li>
-                                <li class="list-group-item d-flex align-items-center">
-                                    <a class="btn btn-info" href="/game/{{ rooms[key].room_number }}">
-                                        <i class="bi-door-open-fill"></i>
-                                        参加
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                            </ul>
+                        {% endfor %}
                     </div>
                 </div>
             {% else %}
